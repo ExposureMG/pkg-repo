@@ -1,0 +1,75 @@
+# Maintainer: Qoder Team <contact@qoder.com>
+
+pkgname=qoder-ide
+pkgver=1.30.1
+pkgrel=1
+pkgdesc="Agentic Coding Platform for Real Software (VS Code fork)"
+arch=('x86_64')
+url="https://qoder.com"
+license=('Proprietary')
+depends=(
+  'alsa-lib'
+  'at-spi2-core'
+  'cairo'
+  'gcc-libs'
+  'glibc'
+  'gtk3'
+  'hicolor-icon-theme'
+  'libcups'
+  'libnotify'
+  'libsecret'
+  'libx11'
+  'libxcb'
+  'libxcomposite'
+  'libxdamage'
+  'libxext'
+  'libxfixes'
+  'libxkbcommon'
+  'libxkbfile'
+  'libxrandr'
+  'mesa'
+  'nspr'
+  'nss'
+  'pango'
+  'systemd-libs'
+  'xdg-utils'
+)
+optdepends=(
+  'bash-completion: Bash command completion'
+  'zsh-completions: Zsh command completion'
+  'vulkan-icd-loader: Vulkan graphics support'
+  'libglvnd: GPU hardware acceleration'
+  'org.freedesktop.secrets: Keyring and credential storage support'
+)
+provides=('qoder-ide' 'qoder-ide-bin')
+conflicts=('qoder-ide-bin')
+replaces=('qoder<1.30.1')
+options=('!strip')
+source=("${pkgname}-${pkgver}_amd64.deb::https://download.qoder.com/release/latest/qoder-ide_amd64.deb")
+sha256sums=('0b23b508dd1b8e210d97710c352f02df749ec1bf4923a2830f0231dbc0d264f2')
+
+package() {
+  # Extract Debian data archive into the package directory
+  bsdtar -xf data.tar.xz -C "${pkgdir}"
+
+  # Set setuid sandbox permissions
+  chmod 4755 "${pkgdir}/usr/share/qoder-ide/chrome-sandbox"
+
+  # Link CLI launchers into /usr/bin
+  install -dm755 "${pkgdir}/usr/bin"
+  ln -s /usr/share/qoder-ide/bin/qoder "${pkgdir}/usr/bin/qoder"
+  ln -s /usr/share/qoder-ide/bin/qoder "${pkgdir}/usr/bin/qoder-ide"
+
+  # Link desktop icon into hicolor theme directory
+  install -dm755 "${pkgdir}/usr/share/icons/hicolor/1024x1024/apps"
+  ln -s /usr/share/pixmaps/qoder-ide.png "${pkgdir}/usr/share/icons/hicolor/1024x1024/apps/qoder-ide.png"
+
+  # Shell completions for qoder-ide alias
+  ln -s qoder "${pkgdir}/usr/share/bash-completion/completions/qoder-ide"
+  ln -s _qoder "${pkgdir}/usr/share/zsh/vendor-completions/_qoder-ide"
+
+  # Install license references
+  install -dm755 "${pkgdir}/usr/share/licenses/${pkgname}"
+  ln -s /usr/share/qoder-ide/resources/app/ThirdPartyNotices.txt "${pkgdir}/usr/share/licenses/${pkgname}/ThirdPartyNotices.txt"
+  ln -s /usr/share/qoder-ide/LICENSES.chromium.html "${pkgdir}/usr/share/licenses/${pkgname}/LICENSES.chromium.html"
+}
