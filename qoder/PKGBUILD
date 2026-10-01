@@ -1,0 +1,66 @@
+# Maintainer: Qoder Team <support@qoder.com>
+
+pkgname=qoder
+epoch=1
+pkgver=0.4.3
+pkgrel=1
+pkgdesc="Agent workbench for human and AI software teams"
+arch=('x86_64')
+url="https://qoder.com"
+license=('Proprietary')
+depends=(
+  'alsa-lib'
+  'at-spi2-core'
+  'cairo'
+  'gcc-libs'
+  'glibc'
+  'gtk3'
+  'hicolor-icon-theme'
+  'libcups'
+  'libnotify'
+  'libsecret'
+  'libx11'
+  'libxcb'
+  'libxcomposite'
+  'libxdamage'
+  'libxext'
+  'libxfixes'
+  'libxkbcommon'
+  'libxrandr'
+  'libxss'
+  'libxtst'
+  'mesa'
+  'nspr'
+  'nss'
+  'pango'
+  'systemd-libs'
+  'util-linux-libs'
+  'xdg-utils'
+)
+optdepends=(
+  'vulkan-icd-loader: Vulkan graphics support'
+  'libglvnd: GPU hardware acceleration'
+  'org.freedesktop.secrets: Keyring and credential storage support'
+)
+provides=('qoder' 'qoder-bin')
+conflicts=('qoder-bin')
+options=('!strip')
+source=("${pkgname}-${pkgver}_amd64.deb::https://download.qoder.com/qoder-app/releases/latest/Qoder-linux-amd64.deb")
+sha256sums=('1e8db4439fdcec587f8c4e0e3872c5696d6d379303061874b5be1f097b03050b')
+
+package() {
+  # Extract Debian data archive into the package directory
+  bsdtar -xf data.tar.xz -C "${pkgdir}"
+
+  # Set setuid sandbox permissions
+  chmod 4755 "${pkgdir}/opt/Qoder/chrome-sandbox"
+
+  # Link CLI launcher into /usr/bin
+  install -dm755 "${pkgdir}/usr/bin"
+  ln -s /opt/Qoder/qoder "${pkgdir}/usr/bin/qoder"
+
+  # Install license references
+  install -dm755 "${pkgdir}/usr/share/licenses/${pkgname}"
+  ln -s /opt/Qoder/LICENSES.chromium.html "${pkgdir}/usr/share/licenses/${pkgname}/LICENSES.chromium.html"
+  ln -s /opt/Qoder/LICENSE.electron.txt "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.electron.txt"
+}
